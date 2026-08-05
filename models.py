@@ -15,4 +15,3 @@ class Book(Base):
     publisher = Column(String(150), nullable = False)
 
 
-

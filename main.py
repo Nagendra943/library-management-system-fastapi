@@ -147,32 +147,3 @@ def delete(book_id: int, db: Session = Depends(get_db)):
         "message": "Book Deleted Successfully"
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

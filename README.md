@@ -141,9 +141,7 @@ http://127.0.0.1:8000/redoc
 
 ## 🧪 Example JSON Request
 
-<img width="940" height="243" alt="Screenshot 2026-03-05 115235" src="https://github.com/user-attachments/assets/e4aa21a8-c39b-494d-8db5-3dcf1938512d" />
-<img width="1920" height="1080" alt="Screenshot (117)" src="https://github.com/user-attachments/assets/5b97aab5-b723-49e5-92e9-6b26f13384c8" />
-<img width="1920" height="1080" alt="Screenshot (116)" src="https://github.com/user-attachments/assets/cbdd01ca-ac94-4b8e-8714-33fcfe65b27e" />
+
 <img width="1920" height="1080" alt="Screenshot (115)" src="https://github.com/user-attachments/assets/2d323563-774f-4a97-b991-355857392bc8" />
 <img width="1920" height="1080" alt="Screenshot (114)" src="https://github.com/user-attachments/assets/4ef423e9-39c1-4ee0-829d-dd0d04f15cc6" />
 <img width="1920" height="1080" alt="Screenshot (113)" src="https://github.com/user-attachments/assets/c9f88027-36dc-49f8-a9d7-a86594825fe2" />

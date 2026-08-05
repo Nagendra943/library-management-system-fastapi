@@ -18,7 +18,7 @@ A RESTful Library Management System built using **FastAPI**, **SQLAlchemy**, and
 
 ## 📂 Project Structure
 
-```
+
 Library_Management_System/
 │── main.py
 │── database.py
@@ -29,7 +29,7 @@ Library_Management_System/
 │── README.md
 ```
 
----
+
 
 ## ✨ Features
 
@@ -141,7 +141,20 @@ http://127.0.0.1:8000/redoc
 
 ## 🧪 Example JSON Request
 
-```json
+<img width="940" height="243" alt="Screenshot 2026-03-05 115235" src="https://github.com/user-attachments/assets/e4aa21a8-c39b-494d-8db5-3dcf1938512d" />
+<img width="1920" height="1080" alt="Screenshot (117)" src="https://github.com/user-attachments/assets/5b97aab5-b723-49e5-92e9-6b26f13384c8" />
+<img width="1920" height="1080" alt="Screenshot (116)" src="https://github.com/user-attachments/assets/cbdd01ca-ac94-4b8e-8714-33fcfe65b27e" />
+<img width="1920" height="1080" alt="Screenshot (115)" src="https://github.com/user-attachments/assets/2d323563-774f-4a97-b991-355857392bc8" />
+<img width="1920" height="1080" alt="Screenshot (114)" src="https://github.com/user-attachments/assets/4ef423e9-39c1-4ee0-829d-dd0d04f15cc6" />
+<img width="1920" height="1080" alt="Screenshot (113)" src="https://github.com/user-attachments/assets/c9f88027-36dc-49f8-a9d7-a86594825fe2" />
+<img width="1920" height="1080" alt="Screenshot (112)" src="https://github.com/user-attachments/assets/55ccbb1e-1436-4315-856f-5b3d4144ee0a" />
+<img width="1920" height="1080" alt="Screenshot (111)" src="https://github.com/user-attachments/assets/7b84b01f-9bd5-42ab-ab01-6ab331632141" />
+<img width="1920" height="1080" alt="Screenshot (110)" src="https://github.com/user-attachments/assets/d8d6344a-d4c4-44b3-8e1b-85e9fa1a9dfc" />
+<img width="1920" height="1080" alt="Screenshot (109)" src="https://github.com/user-attachments/assets/c3daefc0-7554-4366-99df-e93358efc010" />
+<img width="1920" height="1080" alt="Screenshot (108)" src="https://github.com/user-attachments/assets/ec7c9d22-ebaa-4267-9137-6a4cf545f27c" />
+<img width="1920" height="1080" alt="Screenshot (107)" src="https://github.com/user-attachments/assets/24dd22ef-a0d6-4408-9517-6a5f460e8a04" />
+<img width="1920" height="1080" alt="Screenshot (106)" src="https://github.com/user-attachments/assets/685936f8-1c0e-4b52-af34-36f3174dad8a" />
+json
 {
   "title": "Atomic Habits",
   "author": "James Clear",
@@ -150,7 +163,7 @@ http://127.0.0.1:8000/redoc
   "quantity": 15,
   "publisher": "Penguin"
 }
-```
+
 
 ---
 

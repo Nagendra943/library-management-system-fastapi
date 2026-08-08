@@ -1,9 +1,15 @@
+import os
+from dotenv import load_dotenv
+
 from sqlalchemy import create_engine
 #connectivity to FAstApi app to Mysql database
 from sqlalchemy.orm import sessionmaker, declarative_base
 #sessionmaker creates db session #base class for all database models
 
-DATABASE_URL = "mysql+pymysql://root:nagendra%4012@localhost:3306/library_db"
+#load environment variabls from .env file
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
 #Engine is responsible for cerating a connection between fastapi and mysql db
@@ -14,4 +20,4 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
-
+#provides a base class for models of sql table

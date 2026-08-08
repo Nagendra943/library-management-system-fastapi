@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, Boolean
 from database import Base
 
 class Book(Base):
@@ -13,5 +13,5 @@ class Book(Base):
     price = Column(Float, nullable = False)
     quantity = Column(Integer, nullable = False)
     publisher = Column(String(150), nullable = False)
-
+    
 

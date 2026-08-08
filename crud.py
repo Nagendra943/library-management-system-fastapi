@@ -23,9 +23,14 @@ def get_book(db : Session, book_id : int):
         models.Book.id == book_id
     ).first()
 
-def get_books_by_category(db : Session, category : str):
+def get_books_by_title(db : Session, title_name : str):
     return db.query(models.Book).filter(
-        models.Book.category == category
+        models.Book.title == title_name
+    ).all()
+
+def get_books_by_category(db : Session, category_name : str):
+    return db.query(models.Book).filter(
+        models.Book.category == category_name
     ).all()
 
 def get_books_by_author(db : Session, author_name : str):

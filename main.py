@@ -16,7 +16,7 @@ def get_db():            #to start the db session fro every thing
     finally:
         db.close()
 
-# Welcome Route`
+# Welcome Message
 @app.get("/")
 def welcome():
     return {"message" : "Welocome to Library Management System"}
@@ -31,24 +31,34 @@ def create(book : schemas.BookCreate, db : Session = Depends(get_db)):
 def all_books(db : Session = Depends(get_db)):
     return crud.get_all_books(db)
 
-
-    return book
+# Get books by title
+@app.get("/books/title/{title_name}", response_model = list[schemas.BookResponse])
+def books_by_title(title_name : str, db : Session = Depends(get_db)):
+    books = crud.get_books_by_title(db, title_name)
+    if not books:
+        raise HTTPException(
+            status_code = 404,
+            detail = "No Books Found with this Title"
+        )
+    
+    return books
+    
 
 # Get Books by Category
-@app.get("/books/category/{category_name}", response_model=list[schemas.BookResponse])
+@app.get("/books/category/{category_name}", response_model = list[schemas.BookResponse])
 def books_by_category(category_name : str, db: Session = Depends(get_db)):
     books = crud.get_books_by_category(db, category_name)
 
     if not books:
         raise HTTPException(
             status_code = 404,
-            detail = "No Books Found in this Category"
+            detail = "No Books Found with this Category"
         )
 
     return books
 
 #Get books by Author
-@app.get("/books/author/{author_name}", response_model=list[schemas.BookResponse])
+@app.get("/books/author/{author_name}", response_model = list[schemas.BookResponse])
 def books_by_author(author_name : str, db : Session = Depends(get_db)):
     books = crud.get_books_by_author(db, author_name)
 
@@ -61,7 +71,7 @@ def books_by_author(author_name : str, db : Session = Depends(get_db)):
     return books
 
 #Get book by Publisher
-@app.get("/books/publisher/{publisher_name}", response_model=list[schemas.BookResponse])
+@app.get("/books/publisher/{publisher_name}", response_model = list[schemas.BookResponse])
 def book_by_publisher(publisher_name : str, db : Session = Depends(get_db)):
     books = crud.get_books_by_publisher(db, publisher_name)
 
@@ -72,7 +82,8 @@ def book_by_publisher(publisher_name : str, db : Session = Depends(get_db)):
         )
     return books
 
-@app.get("/books/price/{price_val}", response_model=list[schemas.BookResponse])
+# Get books by price
+@app.get("/books/price/{price_val}", response_model = list[schemas.BookResponse])
 def get_by_price(price_val : float, db : Session = Depends(get_db)):
     books = crud.get_books_by_price(db, price_val)
     if not books :
@@ -82,7 +93,8 @@ def get_by_price(price_val : float, db : Session = Depends(get_db)):
         )
     return books   
 
-@app.get("/books/quantity/{quantity_val}", response_model=list[schemas.BookResponse])
+# Get books by Quantity
+@app.get("/books/quantity/{quantity_val}", response_model = list[schemas.BookResponse])
 def get_by_quantity(quantity_val : int, db : Session = Depends(get_db)):
     books = crud.get_books_by_quantity(db, quantity_val)
     if not books :
@@ -92,7 +104,7 @@ def get_by_quantity(quantity_val : int, db : Session = Depends(get_db)):
         )
     return books
 
-#by price range
+# Get books by price range
 @app.get("/books/price-range", response_model = list[schemas.BookResponse])
 def get_by_price_range(min_price : float, max_price : float , db : Session = Depends(get_db)):
     books = crud.get_books_by_price_range(db, min_price, max_price)
@@ -117,7 +129,7 @@ def read_one(book_id : int, db : Session = Depends(get_db)):
     return book
 
 #update Book
-@app.put("/books/{book_id}", response_model=schemas.BookResponse)
+@app.put("/books/{book_id}", response_model = schemas.BookResponse)
 def update(book_id: int,
            book: schemas.BookCreate,
            db: Session = Depends(get_db)):

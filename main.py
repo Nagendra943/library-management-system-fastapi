@@ -114,6 +114,7 @@ def read_one(book_id : int, db : Session = Depends(get_db)):
             status_code = 404,
             detail = "Book Not Found"
         )
+    return book
 
 #update Book
 @app.put("/books/{book_id}", response_model=schemas.BookResponse)

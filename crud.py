@@ -151,30 +151,6 @@ def search_books(db: Session, search_term: str):
         (models.Book.publisher.ilike(search))
     ).all()
 
-def get_books_paginated(
-    db: Session,
-    page: int,
-    limit: int,
-    sort: str
-):
-
-    skip = (page - 1) * limit
-
-    query = db.query(models.Book)
-
-    if sort == "price_asc":
-        query = query.order_by(models.Book.price.asc())
-
-    elif sort == "price_desc":
-        query = query.order_by(models.Book.price.desc())
-
-    elif sort == "title":
-        query = query.order_by(models.Book.title.asc())
-
-    elif sort == "quantity":
-        query = query.order_by(models.Book.quantity.desc())
-
-    return query.offset(skip).limit(limit).all()
 
 def borrow_book(
     db: Session,

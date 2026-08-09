@@ -26,27 +26,14 @@ def create_book(
 ):
     return crud.create_book(db, book)
 
-# Get All Books agination + sorting
-@app.get(
-    "/books",
-    response_model=list[schemas.BookResponse]
-)
+# Get All Books
+@app.get("/books", response_model=list[schemas.BookResponse])
 def all_books(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    sort: str = "title",
     db: Session = Depends(get_db),
     current_admin = Depends(auth.get_current_admin_from_cookie)
 ):
+    return crud.get_all_books(db)
 
-    books = crud.get_books_paginated(
-        db,
-        page,
-        limit,
-        sort
-    )
-
-    return books
 
 # Get books by title
 @app.get("/books/title/{title_name}", response_model = list[schemas.BookResponse])

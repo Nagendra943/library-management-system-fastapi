@@ -6,6 +6,7 @@ from database import get_db
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Response
 import bcrypt
+from fastapi import Query
 
 Base.metadata.create_all(bind=engine)
 
@@ -25,13 +26,27 @@ def create_book(
 ):
     return crud.create_book(db, book)
 
-# Get All Books
-@app.get("/books", response_model=list[schemas.BookResponse])
+# Get All Books agination + sorting
+@app.get(
+    "/books",
+    response_model=list[schemas.BookResponse]
+)
 def all_books(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    sort: str = "title",
     db: Session = Depends(get_db),
     current_admin = Depends(auth.get_current_admin_from_cookie)
 ):
-    return crud.get_all_books(db)
+
+    books = crud.get_books_paginated(
+        db,
+        page,
+        limit,
+        sort
+    )
+
+    return books
 
 # Get books by title
 @app.get("/books/title/{title_name}", response_model = list[schemas.BookResponse])
@@ -146,23 +161,63 @@ def get_by_price_range(
                 detail = "No Books Found in this price range"
             )
     return books
-    
-#Get One Book by ID
-@app.get("/books/{book_id}", response_model=schemas.BookResponse)
-def read_one(
-    book_id: int,
+
+
+# Global Search
+@app.get(
+    "/books/search",
+    response_model=list[schemas.BookResponse]
+)
+def search_books(
+    q: str,
     db: Session = Depends(get_db),
     current_user = Depends(auth.get_current_user_from_cookie)
+):
+
+    books = crud.search_books(db, q)
+
+    if not books:
+        raise HTTPException(
+            status_code=404,
+            detail="No books found"
+        )
+
+    return books
+
+#Get One Book by ID
+@app.get(
+    "/books/{book_id}",
+    response_model=schemas.BookWithAvailability
+)
+def read_one(
+    book_id: int,
+    db: Session = Depends(get_db)
 ):
 
     book = crud.get_book(db, book_id)
 
     if not book:
         raise HTTPException(
-            status_code = 404,
-            detail = "Book Not Found"
+            status_code=404,
+            detail="Book Not Found"
         )
-    return book
+
+    return {
+        "id": book.id,
+        "title": book.title,
+        "author": book.author,
+        "category": book.category,
+        "price": book.price,
+        "quantity": book.quantity,
+        "publisher": book.publisher,
+        "available": book.quantity > 0,
+        "status": (
+            "Available"
+            if book.quantity > 0
+            else "Out of Stock"
+        )
+    }
+
 
 #update Book
 @app.put("/books/{book_id}", response_model=schemas.BookResponse)
@@ -378,3 +433,192 @@ def change_password(
         "message": "Password changed successfully"
     }
 
+
+# borrow Book
+@app.post(
+    "/books/{book_id}/borrow",
+    response_model=schemas.BorrowBookResponse
+)
+def borrow_book(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(
+        auth.get_current_user_from_cookie
+    )
+):
+
+    result = crud.borrow_book(
+        db,
+        current_user.id,
+        book_id
+    )
+
+    if result == "BOOK_NOT_FOUND":
+        raise HTTPException(
+            status_code=404,
+            detail="Book Not Found"
+        )
+
+    if result == "OUT_OF_STOCK":
+        raise HTTPException(
+            status_code=400,
+            detail="Book is out of stock"
+        )
+
+    if result == "ALREADY_BORROWED":
+        raise HTTPException(
+            status_code=400,
+            detail="You already borrowed this book"
+        )
+
+    return result
+
+
+# Return Book
+@app.post(
+    "/books/{book_id}/return",
+    response_model=schemas.BorrowBookResponse
+)
+def return_book(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(
+        auth.get_current_user_from_cookie
+    )
+):
+
+    borrowing = crud.return_book(
+        db,
+        current_user.id,
+        book_id
+    )
+
+    if not borrowing:
+        raise HTTPException(
+            status_code=404,
+            detail="No active borrowing found"
+        )
+
+    return borrowing
+
+# Borrowing History
+@app.get(
+    "/my-borrowings",
+    response_model=list[schemas.BorrowingHistoryResponse]
+)
+def my_borrowings(
+    db: Session = Depends(get_db),
+    current_user = Depends(
+        auth.get_current_user_from_cookie
+    )
+):
+
+    return crud.get_my_borrowings(
+        db,
+        current_user.id
+    )
+
+
+# Admin borrowing Management
+@app.get(
+    "/admin/borrowings",
+    response_model=list[schemas.AdminBorrowingResponse]
+)
+def admin_borrowings(
+    db: Session = Depends(get_db),
+    current_admin = Depends(
+        auth.get_current_admin_from_cookie
+    )
+):
+
+    return crud.get_all_borrowings(db)
+
+
+#Admin Dashboard
+@app.get(
+    "/admin/dashboard",
+    response_model=schemas.DashboardResponse
+)
+def admin_dashboard(
+    db: Session = Depends(get_db),
+    current_admin = Depends(
+        auth.get_current_admin_from_cookie
+    )
+):
+
+    return crud.get_dashboard_stats(db)
+
+
+# Admin view all users
+@app.get(
+    "/admin/users",
+    response_model=list[schemas.UserResponse]
+)
+def admin_users(
+    db: Session = Depends(get_db),
+    current_admin = Depends(
+        auth.get_current_admin_from_cookie
+    )
+):
+
+    return crud.get_all_users(db)
+
+
+#Admin make user admin
+@app.put(
+    "/admin/users/{user_id}/make-admin",
+    response_model=schemas.UserResponse
+)
+def make_admin(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin = Depends(
+        auth.get_current_admin_from_cookie
+    )
+):
+
+    user = crud.make_user_admin(
+        db,
+        user_id
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User Not Found"
+        )
+
+    return user
+
+
+# Admin Remove Admin
+@app.put(
+    "/admin/users/{user_id}/remove-admin",
+    response_model=schemas.UserResponse
+)
+def remove_admin(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin = Depends(
+        auth.get_current_admin_from_cookie
+    )
+):
+
+    if user_id == current_admin.id:
+        raise HTTPException(
+            status_code=400,
+            detail="You cannot remove your own admin access"
+        )
+
+    user = crud.remove_user_admin(
+        db,
+        user_id
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User Not Found"
+        )
+
+    return user

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session   # NEed session fro everey operarion
+from datetime import datetime
 import models
 import schemas
 import bcrypt
@@ -132,6 +133,203 @@ def change_password(db: Session, user, new_password: str):
     ).decode("utf-8")
 
     user.hashed_password = hashed
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+def search_books(db: Session, search_term: str):
+
+    search = f"%{search_term}%"
+
+    return db.query(models.Book).filter(
+        (models.Book.title.ilike(search)) |
+        (models.Book.author.ilike(search)) |
+        (models.Book.category.ilike(search)) |
+        (models.Book.publisher.ilike(search))
+    ).all()
+
+def get_books_paginated(
+    db: Session,
+    page: int,
+    limit: int,
+    sort: str
+):
+
+    skip = (page - 1) * limit
+
+    query = db.query(models.Book)
+
+    if sort == "price_asc":
+        query = query.order_by(models.Book.price.asc())
+
+    elif sort == "price_desc":
+        query = query.order_by(models.Book.price.desc())
+
+    elif sort == "title":
+        query = query.order_by(models.Book.title.asc())
+
+    elif sort == "quantity":
+        query = query.order_by(models.Book.quantity.desc())
+
+    return query.offset(skip).limit(limit).all()
+
+def borrow_book(
+    db: Session,
+    user_id: int,
+    book_id: int
+):
+
+    book = db.query(models.Book).filter(
+        models.Book.id == book_id
+    ).first()
+
+    if not book:
+        return "BOOK_NOT_FOUND"
+
+    if book.quantity <= 0:
+        return "OUT_OF_STOCK"
+
+    existing_borrow = db.query(models.BorrowedBook).filter(
+        models.BorrowedBook.user_id == user_id,
+        models.BorrowedBook.book_id == book_id,
+        models.BorrowedBook.status == "borrowed"
+    ).first()
+
+    if existing_borrow:
+        return "ALREADY_BORROWED"
+
+    book.quantity -= 1
+
+    borrowing = models.BorrowedBook(
+        user_id=user_id,
+        book_id=book_id,
+        status="borrowed"
+    )
+
+    db.add(borrowing)
+    db.commit()
+    db.refresh(borrowing)
+
+    return borrowing
+
+
+def return_book(
+    db: Session,
+    user_id: int,
+    book_id: int
+):
+
+    borrowing = db.query(models.BorrowedBook).filter(
+        models.BorrowedBook.user_id == user_id,
+        models.BorrowedBook.book_id == book_id,
+        models.BorrowedBook.status == "borrowed"
+    ).first()
+
+    if not borrowing:
+        return None
+
+    book = db.query(models.Book).filter(
+        models.Book.id == book_id
+    ).first()
+
+    if book:
+        book.quantity += 1
+
+    borrowing.status = "returned"
+    borrowing.returned_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(borrowing)
+
+    return borrowing
+
+
+def get_my_borrowings(
+    db: Session,
+    user_id: int
+):
+
+    return db.query(models.BorrowedBook).filter(
+        models.BorrowedBook.user_id == user_id
+    ).order_by(
+        models.BorrowedBook.borrowed_at.desc()
+    ).all()
+
+
+def get_all_borrowings(db: Session):
+
+    return db.query(
+        models.BorrowedBook
+    ).order_by(
+        models.BorrowedBook.borrowed_at.desc()
+    ).all()
+
+
+def get_dashboard_stats(db: Session):
+
+    total_books = db.query(models.Book).count()
+
+    total_users = db.query(models.User).count()
+
+    total_borrowed = db.query(
+        models.BorrowedBook
+    ).filter(
+        models.BorrowedBook.status == "borrowed"
+    ).count()
+
+    available_books = db.query(
+        models.Book
+    ).filter(
+        models.Book.quantity > 0
+    ).count()
+
+    return {
+        "total_books": total_books,
+        "total_users": total_users,
+        "total_borrowed": total_borrowed,
+        "available_books": available_books
+    }
+
+def get_all_users(db: Session):
+
+    return db.query(models.User).all()
+
+def make_user_admin(
+    db: Session,
+    user_id: int
+):
+
+    user = db.query(models.User).filter(
+        models.User.id == user_id
+    ).first()
+
+    if not user:
+        return None
+
+    user.is_admin = True
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+def remove_user_admin(
+    db: Session,
+    user_id: int
+):
+
+    user = db.query(models.User).filter(
+        models.User.id == user_id
+    ).first()
+
+    if not user:
+        return None
+
+    user.is_admin = False
 
     db.commit()
     db.refresh(user)

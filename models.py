@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, DateTime
 from database import Base
-
+from datetime import datetime
 class Book(Base):
     # def __repr__(self):
     # return f"<Book(title='{self.title}', author='{self.author}')>"
@@ -28,3 +28,38 @@ class User(Base):
     hashed_password = Column(String(300), nullable = False)
 
     is_admin = Column(Boolean, default = False, nullable = False)
+
+class BorrowedBook(Base):
+
+    __tablename__ = "borrowed_books"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    book_id = Column(
+        Integer,
+        ForeignKey("books.id"),
+        nullable=False
+    )
+
+    borrowed_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    returned_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+    status = Column(
+        String(20),
+        default="borrowed",
+        nullable=False
+    )

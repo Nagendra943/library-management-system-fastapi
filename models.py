@@ -15,3 +15,16 @@ class Book(Base):
     publisher = Column(String(150), nullable = False)
     
 
+class User(Base):
+
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key = True, index = True)
+
+    username = Column(String(100), nullable = False, unique = True)
+
+    email = Column(String(100), nullable = False, unique = True)
+
+    hashed_password = Column(String(300), nullable = False)
+
+    is_admin = Column(Boolean, default = False, nullable = False)

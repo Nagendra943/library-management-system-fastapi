@@ -14,3 +14,32 @@ class BookResponse(BookCreate):
     model_config = {
         "from_attributes" : True
     }
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_admin: bool
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token : str
+    token_type : str
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_password: str

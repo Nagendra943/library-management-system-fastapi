@@ -21,3 +21,12 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 #provides a base class for models of sql table
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+        yield db
+
+    finally:
+        db.close()

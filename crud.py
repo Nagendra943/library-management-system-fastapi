@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session   # NEed session fro everey operarion
 import models
 import schemas
+import bcrypt
 
 
 def create_book(db : Session, book : schemas.BookCreate):
@@ -25,22 +26,22 @@ def get_book(db : Session, book_id : int):
 
 def get_books_by_title(db : Session, title_name : str):
     return db.query(models.Book).filter(
-        models.Book.title == title_name
+        models.Book.title.ilike(f"%{title_name}%")
     ).all()
 
 def get_books_by_category(db : Session, category_name : str):
     return db.query(models.Book).filter(
-        models.Book.category == category_name
+        models.Book.category.ilike(f"%{category_name}%")
     ).all()
 
 def get_books_by_author(db : Session, author_name : str):
     return db.query(models.Book).filter(
-        models.Book.author == author_name
+        models.Book.author.ilike(f"%{author_name}%")
     ).all()
 
 def get_books_by_publisher(db : Session, publisher_name : str):
     return db.query(models.Book).filter(
-        models.Book.publisher == publisher_name
+        models.Book.publisher.ilike(f"%{publisher_name}%")
     ).all()
 
 def get_books_by_price(db : Session, price_val : float):
@@ -83,6 +84,56 @@ def delete_book(db : Session, book_id : int):
     db.commit()
     return db_book
 
-    
+
+def create_user(user: schemas.UserCreate, db: Session):
+
+    hashed = bcrypt.hashpw(
+        user.password.encode(),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    new_user = models.User(
+        username = user.username,
+        email = user.email,
+        hashed_password = hashed
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
+
+def validate_user(user: schemas.UserLogin, db: Session):
+
+    user_exist = db.query(models.User).filter(
+        models.User.email == user.email
+    ).first()
+
+    if not user_exist:
+        return None
+
+    password_correct = bcrypt.checkpw(
+        user.password.encode(),
+        user_exist.hashed_password.encode()
+    )
+
+    if not password_correct:
+        return None
+
+    return user_exist
 
 
+def change_password(db: Session, user, new_password: str):
+
+    hashed = bcrypt.hashpw(
+        new_password.encode(),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    user.hashed_password = hashed
+
+    db.commit()
+    db.refresh(user)
+
+    return user

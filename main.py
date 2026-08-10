@@ -7,10 +7,21 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Response
 import bcrypt
 from fastapi import Query
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 
 app=FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Welcome Message
 @app.get("/")

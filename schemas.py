@@ -1,7 +1,7 @@
-from pydantic import BaseModel, field_serializer #datavalidation , serialization, type check
+from pydantic import BaseModel, field_serializer, field_validator #datavalidation , serialization, type check
 from datetime import datetime
 from typing import Optional
-
+import re
 
 def format_datetime(value):
     if value is None:
@@ -25,10 +25,28 @@ class BookResponse(BookCreate):
         "from_attributes" : True
     }
 
+
 class UserCreate(BaseModel):
     username: str
     email: str
     password: str
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value):
+        if len(value) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+
+        if not re.search(r"[A-Za-z]", value):
+            raise ValueError("Password must contain at least one letter")
+
+        if not re.search(r"[0-9]", value):
+            raise ValueError("Password must contain at least one number")
+
+        if not re.search(r"[^A-Za-z0-9]", value):
+            raise ValueError("Password must contain at least one special character")
+
+        return value
 
 
 class UserLogin(BaseModel):

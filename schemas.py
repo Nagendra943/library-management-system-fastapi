@@ -133,3 +133,42 @@ class DashboardResponse(BaseModel):
     total_borrowed: int
     available_books: int
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class VerifyOTPRequest(BaseModel):
+    email: str
+    otp: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str
+    confirm_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, value):
+        if len(value) < 8:
+            raise ValueError(
+                "Password must be at least 8 characters long"
+            )
+
+        if not re.search(r"[A-Za-z]", value):
+            raise ValueError(
+                "Password must contain at least one letter"
+            )
+
+        if not re.search(r"[0-9]", value):
+            raise ValueError(
+                "Password must contain at least one number"
+            )
+
+        if not re.search(r"[^A-Za-z0-9]", value):
+            raise ValueError(
+                "Password must contain at least one special character"
+            )
+
+        return value

@@ -63,3 +63,36 @@ class BorrowedBook(Base):
         default="borrowed",
         nullable=False
     )
+
+class PasswordResetOTP(Base):
+    __tablename__ = "password_reset_otps"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    email = Column(
+        String(100),
+        nullable=False,
+        index=True
+    )
+
+    otp_hash = Column(
+        String(300),
+        nullable=False
+    )
+
+    expires_at = Column(
+        DateTime,
+        nullable=False
+    )
+
+    used = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )

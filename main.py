@@ -364,7 +364,10 @@ def get_me(
 def logout(response: Response):
 
     response.delete_cookie(
-        key="access_token"
+        key="access_token",
+        httponly=True,
+        secure=True,
+        samesite="none"
     )
 
     return {

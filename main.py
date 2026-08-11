@@ -352,7 +352,6 @@ def login_user(
         "token_type" : "bearer"
     }
 
-
 # Get Current Logged-in User
 @app.get("/me", response_model=schemas.UserResponse)
 def get_me(
@@ -360,6 +359,17 @@ def get_me(
 ):
     return current_user
 
+# For Logout
+@app.post("/logout")
+def logout(response: Response):
+
+    response.delete_cookie(
+        key="access_token"
+    )
+
+    return {
+        "message": "Logout successful"
+    }
 
 # Testing Authorization
 @app.get("/test-auth")
@@ -411,18 +421,6 @@ def test_cookie_admin(
         "user_id": current_admin.id,
         "username": current_admin.username,
         "is_admin": current_admin.is_admin
-    }
-
-# For Logout
-@app.post("/logout")
-def logout(response: Response):
-
-    response.delete_cookie(
-        key="access_token"
-    )
-
-    return {
-        "message": "Logout successful"
     }
 
 

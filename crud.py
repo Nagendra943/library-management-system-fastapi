@@ -82,29 +82,51 @@ def get_book_categories(db: Session):
     ]
 
 def get_paginated_categories(
-    db,
-    page=1,
-    limit=20,
-    search=None
+    db: Session,
+    page: int = 1,
+    limit: int = 20,
+    search: str | None = None
 ):
+
     offset = (page - 1) * limit
 
+    # Base query
     query = db.query(
         models.Book.category,
-        func.count(models.Book.id).label("count")
+        func.count(models.Book.id).label("book_count")
     )
 
+    # Ignore NULL categories
+    query = query.filter(
+        models.Book.category.isnot(None)
+    )
+
+    # Search
     if search:
         query = query.filter(
             models.Book.category.ilike(f"%{search}%")
         )
 
+    # Group categories
     query = query.group_by(
         models.Book.category
     )
 
-    total = query.count()
+    # Count total distinct categories separately
+    count_query = db.query(
+        func.count(func.distinct(models.Book.category))
+    ).filter(
+        models.Book.category.isnot(None)
+    )
 
+    if search:
+        count_query = count_query.filter(
+            models.Book.category.ilike(f"%{search}%")
+        )
+
+    total = count_query.scalar()
+
+    # Get requested page
     categories = (
         query
         .order_by(models.Book.category.asc())
@@ -122,16 +144,17 @@ def get_paginated_categories(
     return {
         "items": [
             {
-                "name": category,
-                "count": count
+                "category": category,
+                "book_count": book_count
             }
-            for category, count in categories
+            for category, book_count in categories
         ],
         "page": page,
         "limit": limit,
         "total": total,
         "total_pages": total_pages
     }
+
 
 def get_paginated_books(
     db: Session,

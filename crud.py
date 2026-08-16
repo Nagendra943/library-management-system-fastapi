@@ -3,6 +3,7 @@ from datetime import datetime
 import models
 import schemas
 import bcrypt
+from sqlalchemy import func
 
 
 def create_book(db : Session, book : schemas.BookCreate):
@@ -60,6 +61,99 @@ def get_books_by_price_range(db : Session, min_price : int, max_price : int):
         models.Book.price >= min_price,
         models.Book.price <= max_price
     ).all()
+
+def get_book_categories(db: Session):
+
+    categories = db.query(
+        models.Book.category,
+        func.count(models.Book.id)
+    ).group_by(
+        models.Book.category
+    ).order_by(
+        models.Book.category
+    ).all()
+
+    return [
+        {
+            "category": category,
+            "book_count": count
+        }
+        for category, count in categories
+    ]
+
+def get_paginated_books(
+    db: Session,
+    page: int = 1,
+    limit: int = 20,
+    category: str | None = None,
+    search: str | None = None
+):
+
+    query = db.query(models.Book)
+
+    # =========================
+    # CATEGORY FILTER
+    # =========================
+
+    if category:
+        query = query.filter(
+            models.Book.category.ilike(category)
+        )
+
+    # =========================
+    # SEARCH
+    # =========================
+
+    if search:
+
+        search_term = f"%{search}%"
+
+        query = query.filter(
+            (models.Book.title.ilike(search_term)) |
+            (models.Book.author.ilike(search_term)) |
+            (models.Book.category.ilike(search_term)) |
+            (models.Book.publisher.ilike(search_term))
+        )
+
+    # =========================
+    # TOTAL COUNT
+    # =========================
+
+    total_books = query.count()
+
+    # =========================
+    # PAGINATION
+    # =========================
+
+    offset = (page - 1) * limit
+
+    books = query.order_by(
+        models.Book.id
+    ).offset(
+        offset
+    ).limit(
+        limit
+    ).all()
+
+    # =========================
+    # TOTAL PAGES
+    # =========================
+
+    total_pages = (
+        (total_books + limit - 1) // limit
+        if total_books > 0
+        else 1
+    )
+
+    return {
+        "books": books,
+        "page": page,
+        "limit": limit,
+        "total_books": total_books,
+        "total_pages": total_pages,
+        "has_next": page < total_pages,
+        "has_previous": page > 1
+    }
 
 def update_book(db : Session, book_id : int, book : schemas.BookCreate):
     db_book = get_book(db, book_id)

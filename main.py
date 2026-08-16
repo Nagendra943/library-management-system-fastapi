@@ -223,6 +223,45 @@ def search_books(
 
     return books
 
+
+@app.get(
+    "/books/categories",
+    response_model=list[schemas.CategoryResponse]
+)
+def get_categories(
+    db: Session = Depends(get_db),
+    current_user = Depends(
+        auth.get_current_user_from_cookie
+    )
+):
+
+    return crud.get_book_categories(db)
+
+
+@app.get(
+    "/books/browse",
+    response_model=schemas.PaginatedBooksResponse
+)
+def browse_books(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    category: str | None = None,
+    search: str | None = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(
+        auth.get_current_user_from_cookie
+    )
+):
+
+    return crud.get_paginated_books(
+        db=db,
+        page=page,
+        limit=limit,
+        category=category,
+        search=search
+    )
+
+
 #Get One Book by ID
 @app.get(
     "/books/{book_id}",

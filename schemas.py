@@ -172,3 +172,17 @@ class ResetPasswordRequest(BaseModel):
             )
 
         return value
+
+class PaginatedBooksResponse(BaseModel):
+    books: list[BookResponse]
+    page: int
+    limit: int
+    total_books: int
+    total_pages: int
+    has_next: bool
+    has_previous: bool
+
+
+class CategoryResponse(BaseModel):
+    category: str
+    book_count: int

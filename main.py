@@ -226,17 +226,24 @@ def search_books(
 
 @app.get(
     "/books/categories",
-    response_model=list[schemas.CategoryResponse]
+    response_model=schemas.PaginatedCategoriesResponse
 )
 def get_categories(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    search: str | None = None,
     db: Session = Depends(get_db),
     current_user = Depends(
         auth.get_current_user_from_cookie
     )
 ):
 
-    return crud.get_book_categories(db)
-
+    return crud.get_paginated_categories(
+        db=db,
+        page=page,
+        limit=limit,
+        search=search
+    )
 
 @app.get(
     "/books/browse",

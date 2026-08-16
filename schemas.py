@@ -186,3 +186,11 @@ class PaginatedBooksResponse(BaseModel):
 class CategoryResponse(BaseModel):
     category: str
     book_count: int
+
+
+class PaginatedCategoriesResponse(BaseModel):
+    items: list[CategoryResponse]
+    page: int
+    limit: int
+    total: int
+    total_pages: int

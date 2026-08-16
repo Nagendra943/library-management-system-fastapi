@@ -81,6 +81,58 @@ def get_book_categories(db: Session):
         for category, count in categories
     ]
 
+def get_paginated_categories(
+    db,
+    page=1,
+    limit=20,
+    search=None
+):
+    offset = (page - 1) * limit
+
+    query = db.query(
+        models.Book.category,
+        func.count(models.Book.id).label("count")
+    )
+
+    if search:
+        query = query.filter(
+            models.Book.category.ilike(f"%{search}%")
+        )
+
+    query = query.group_by(
+        models.Book.category
+    )
+
+    total = query.count()
+
+    categories = (
+        query
+        .order_by(models.Book.category.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    total_pages = (
+        (total + limit - 1) // limit
+        if total > 0
+        else 0
+    )
+
+    return {
+        "items": [
+            {
+                "name": category,
+                "count": count
+            }
+            for category, count in categories
+        ],
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": total_pages
+    }
+
 def get_paginated_books(
     db: Session,
     page: int = 1,

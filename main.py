@@ -82,7 +82,7 @@ def create_book(
 @app.get("/books", response_model=list[schemas.BookResponse])
 def all_books(
     db: Session = Depends(get_db),
-    current_admin = Depends(auth.get_current_admin_from_cookie)
+    current_user = Depends(auth.get_current_user_from_cookie)
 ):
     return crud.get_all_books(db)
 
